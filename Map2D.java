@@ -83,7 +83,7 @@ public interface Map2D {
 	 * @param p the 2D coordinate.
 	 * @return true iff p is with in this map.
 	 */
-	boolean isInside(Pixel2D p);
+	public  boolean isInside(Pixel2D p);
 
 	/**
 	*this function checks if the map is cyclic.
@@ -115,7 +115,7 @@ public interface Map2D {
 	 ** @param targetColor for the color to be replaced.
 	 ** @return replacementColor for the color we replace with.
 	 */
-	public void floodFill(int[][] map, int x, int y, int targetColor, int replacementColor);
+
 
 
 	/**

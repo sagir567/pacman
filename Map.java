@@ -1,7 +1,10 @@
 package exe.ex3;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.Queue;
+import java.util.Arrays;
+
 
 /**
  * This class represents a 2D map as a "screen" or a raster matrix or maze over integers.
@@ -11,7 +14,7 @@ import java.util.Queue;
 
 public class Map implements Map2D {
 
-    private int[][] _map;
+    public static int[][] _map;
 
     private boolean _cyclicFlag = true;
 
@@ -53,7 +56,6 @@ public class Map implements Map2D {
             }
             this._map = Matrix;//changing this map to be the copy.
 
-
         }
     }
 
@@ -82,7 +84,7 @@ public class Map implements Map2D {
         int[][] copiedArray = new int[rows][coll];//making a deep copy with same height and width.
         for (int i = 0; i < rows; i++) {
             System.arraycopy(this._map[i], 0, copiedArray[i], 0, coll);//iteration and insertion of this map
-                                                                                     //to the copied array
+            //to the copied array
         }
         ans = copiedArray;
 
@@ -132,15 +134,13 @@ public class Map implements Map2D {
      */
     public int fill(Pixel2D p, int new_v) {
         int ans = 0;
-        int[][] a2= getMap();//save map in a2.
-        floodFill(this._map,p.getX(),p.getY(),getPixel(p),new_v);// use the floodFill algorithm to change to paint the map.
-        for (int i = 0; i <this._map.length ; i++)
-        {                                      //count number of pixels changed.
-            for (int j = 0; j <this._map[0].length ; j++) {
-               if(this._map[i][j]!=a2[i][j])
-               {
-                   ans+=1;
-               }
+        int[][] a2 = getMap();//save map in a2.
+        floodFill(p.getX(), p.getY(), getPixel(p), new_v);// use the floodFill algorithm to change to paint the map.
+        for (int i = 0; i < this._map.length; i++) {                                      //count number of pixels changed.
+            for (int j = 0; j < this._map[0].length; j++) {
+                if (this._map[i][j] != a2[i][j]) {
+                    ans += 1;
+                }
             }
 
         }
@@ -156,8 +156,12 @@ public class Map implements Map2D {
         Pixel2D[] ans = null;
         Map2D map1 = new Map(_map);
         Map2D map2 = map1.allDistance(p1, obsColor);
+        for (int i = 0; i < map2.getMap().length; i++) {
+            System.out.println(Arrays.toString(map2.getMap()[i]));
+            System.out.println("");
+        };
         // Check if p1 or p2 are unreachable or have the same distance
-        if(map2.getPixel(p2)==-1||map2.getPixel(p1)==-1||map2.getPixel(p2)==map2.getPixel(p1))
+        if (map2.getPixel(p2) == -1 || map2.getPixel(p1) == -1 || map2.getPixel(p2) == map2.getPixel(p1))
             return null;
         else {
             int distance = map2.getPixel(p2);
@@ -193,27 +197,28 @@ public class Map implements Map2D {
     /**
      * a simple implementation of floodFill as presented in "https://en.wikipedia.org/wiki/Flood_fill"
      */
-    public void floodFill(int[][] map, int x, int y, int targetColor, int replacementColor) {
+    public void floodFill(int x, int y, int targetColor, int replacementColor) {
         Pixel2D a = new Index2D(x, y);
-        if (!isInside(a) || map[x][y] != targetColor || map[x][y] == replacementColor) {//if the pixel is not inside,
-                                            // or the pixel's target is already changed, or if the target color is not the
-                                             //color we want to change stop the recursive function.
+        if (!this.isInside(a) || this._map[x][y] != targetColor || this._map[x][y] == replacementColor) {//if the pixel is not inside,
+            // or the pixel's target is already changed, or if the target color is not the
+            //color we want to change stop the recursive function.
             return;
         }
-        map[x][y] = replacementColor;//change the color to the replacement color.
-        floodFill(map, x + 1, y, targetColor, replacementColor);//fill right
-        floodFill(map, x - 1, y, targetColor, replacementColor);//fill left
-        floodFill(map, x, y + 1, targetColor, replacementColor);//fill down
-        floodFill(map, x, y - 1, targetColor, replacementColor);//fill up
+        this._map[x][y] = replacementColor;//change the color to the replacement color.
+        floodFill(x + 1, y, targetColor, replacementColor);//fill right
+        floodFill(x - 1, y, targetColor, replacementColor);//fill left
+        floodFill(x, y + 1, targetColor, replacementColor);//fill down
+        floodFill(x, y - 1, targetColor, replacementColor);//fill up
     }
 
-    @Override
+
     /////// add your code below ///////
+    @Override
     public boolean isInside(Pixel2D p) {
         int x = p.getX();//x and y coordinates of p
         int y = p.getY();
-        int row = this._map.length;
-        int coll = this._map[0].length;
+        int row = _map.length;
+        int coll = _map[0].length;
         if (x >= row | y >= coll) {//if the x and y coordinates are larger than the max options of coordinates return false.
             return false;
         }
@@ -224,44 +229,9 @@ public class Map implements Map2D {
     @Override
 
     public boolean isNeighbors(Pixel2D p1, Pixel2D p2) {//neighbor checking algorithm.
-        int sumP1XY = p1.getX() + p1.getY();//sum of x and y of p1
-        int sumP2XY = p2.getX() + p2.getY();//sum of x and y of p2
-        if (!isCyclic()) {//if the map is not cyclic
 
-            if (Math.abs(sumP1XY - sumP2XY) == 1) { //make sure the abs value of the difference is 1,
-                return true;
-            }
-
-        } else {//if cyclic
-            int width = getWidth(); // Replace getWidth() with the actual width of the map
-            int height = getHeight(); // Replace getHeight() with the actual height of the map
-
-            // Check if p1 is at the left edge and p2 is at the right edge
-            if (p1.getX() == 0 && p2.getX() == width - 1 && p1.getY() == p2.getY()) {
-                return true;
-            }
-
-            // Check if p1 is at the right edge and p2 is at the left edge
-            if (p1.getX() == width - 1 && p2.getX() == 0 && p1.getY() == p2.getY()) {
-                return true;
-            }
-
-            // Check if p1 is at the top edge and p2 is at the bottom edge
-            if (p1.getY() == 0 && p2.getY() == height - 1 && p1.getX() == p2.getX()) {
-                return true;
-            }
-
-            // Check if p1 is at the bottom edge and p2 is at the top edge
-            if (p1.getY() == height - 1 && p2.getY() == 0 && p1.getX() == p2.getX()) {
-                return true;
-            }
-
-
-        }
-        return false;
+        return(shortestPath(p1,p2,-1).length==2)?true:false;
     }
-
-
 
 
     @Override
@@ -269,31 +239,13 @@ public class Map implements Map2D {
      *this function checks if the map is cyclic.
      */
     public boolean isCyclic() {
-        int rows = this._map.length;
-        int cols = this._map[0].length;
-        for (int j = 0; j < cols; j++) {//checks if the top row is connected to the bottom row
-            if (this._map[0][j] == 0 && this._map[rows - 1][j] == 0) {
-                return true;
-            }
-        }//if in any instance two polar lines of the map have a passage between them return true
-
-        // checks if the left row is connected to the right row
-        for (int i = 0; i < rows; i++) {
-            if (this._map[i][0] == 0 && this._map[i][cols - 1] == 0) {
-                return true;
-            }
-        }// otherwise false.
-
-        return false;
+        return this._cyclicFlag;
     }
 
     @Override
     /////// add your code below ///////
     public void setCyclic(boolean cy) {//set map to be cyclic
-        if (isCyclic() == true) {
-            cy = true;
-        }
-        cy = false;
+        _cyclicFlag = cy;
     }
 
 
@@ -303,15 +255,13 @@ public class Map implements Map2D {
         int cols = this._map[0].length;
         int[][] distances = new int[rows][cols];
 
-
-        for (int i = 0; i < rows; i++) {// Initialize all distances as -1 (indicating unreachable)
+        for (int i = 0; i < rows; i++) {
             for (int j = 0; j < cols; j++) {
                 distances[i][j] = -1;
             }
         }
 
-        distances[start.getX()][start.getY()] = 0;  // / Set the distance of the start pixel to 0
-
+        distances[start.getX()][start.getY()] = 0;
 
         int[] dx = {0, 0, -1, 1};
         int[] dy = {-1, 1, 0, 0};
@@ -319,18 +269,15 @@ public class Map implements Map2D {
         Queue<int[]> queue = new LinkedList<>();
         queue.offer(new int[]{start.getX(), start.getY()});
 
-        // Perform Breadth-First Search (BFS)
         while (!queue.isEmpty()) {
             int[] current = queue.poll();
             int currX = current[0];
             int currY = current[1];
 
-            // Explore the four possible directions: up, down, left, right
             for (int i = 0; i < 4; i++) {
-                int newX = currX + dx[i];
-                int newY = currY + dy[i];
+                int newX = (currX + dx[i] + rows) % rows;
+                int newY = (currY + dy[i] + cols) % cols;
 
-                // Check if the neighbor is a valid move and has not been visited yet
                 if (isValidMove(this._map, newX, newY) && distances[newX][newY] == -1) {
                     distances[newX][newY] = distances[currX][currY] + 1;
                     queue.offer(new int[]{newX, newY});
@@ -342,7 +289,7 @@ public class Map implements Map2D {
     }
 
 
-    private static boolean isValidMove(int[][] grid, int x, int y) {
+    public static boolean isValidMove(int[][] grid, int x, int y) {
         int rows = grid.length;
         int cols = grid[0].length;
         return x >= 0 && x < rows && y >= 0 && y < cols && grid[x][y] != -1;//if slot it inaccesible return false otherwise true.
